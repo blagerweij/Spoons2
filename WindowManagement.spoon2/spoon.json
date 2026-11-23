@@ -1,0 +1,6 @@
+{
+    "name": "WindowManagement",
+    "author": "Barry Lagerweij",
+    "version": "1.0.0",
+    "description": "Resize the focused window: maximize, left half or right half of the screen."
+}

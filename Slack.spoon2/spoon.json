@@ -1,0 +1,6 @@
+{
+    "name": "Slack",
+    "author": "Barry Lagerweij",
+    "version": "1.0.0",
+    "description": "Hotkey to jump to a Slack channel from any application."
+}

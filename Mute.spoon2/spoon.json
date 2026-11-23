@@ -1,0 +1,6 @@
+{
+    "name": "Mute",
+    "author": "Barry Lagerweij",
+    "version": "1.0.0",
+    "description": "Toggle microphone mute, also in Zoom and Teams."
+}

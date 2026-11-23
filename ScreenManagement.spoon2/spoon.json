@@ -1,0 +1,6 @@
+{
+    "name": "ScreenManagement",
+    "author": "Barry Lagerweij",
+    "version": "1.0.0",
+    "description": "Move the focused window to the next or previous screen, also for fullscreen windows."
+}

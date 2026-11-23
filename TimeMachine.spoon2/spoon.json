@@ -1,0 +1,6 @@
+{
+    "name": "TimeMachine",
+    "author": "Barry Lagerweij",
+    "version": "1.0.0",
+    "description": "Exclude caches and build output folders from Time Machine backups."
+}

@@ -1,0 +1,6 @@
+{
+    "name": "TerminalSwitch",
+    "author": "Barry Lagerweij",
+    "version": "1.0.0",
+    "description": "Toggle between the terminal and the previously focused application."
+}
