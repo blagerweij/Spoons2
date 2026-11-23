@@ -1,0 +1,6 @@
+{
+    "name": "Clipboard",
+    "author": "Barry Lagerweij",
+    "version": "1.1.0",
+    "description": "Clipboard history: pick one of the last 10 copied texts or images and paste it."
+}

@@ -34,5 +34,6 @@ and its default keys in `defaultHotkeys`. `start()` / `stop()` enable / disable 
 | Reminder | `add` (`cah R`): new reminder | |
 | Presentify | `draw` (`ctrl A`), `spotlight` (`ctrl S`), `highlight` (`ctrl L`) | |
 | Slack | `switchChannel` (`cah K`) | |
+| Clipboard | `show` (`cah V`): pick one of the last 10 copies (text / image) and paste it | |
 
 Presentify's drawing keys (`Esc`, `F` `L` `R` `O`, `1`-`6`) only exist while drawing and are fixed.
