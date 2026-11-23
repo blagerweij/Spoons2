@@ -1,4 +1,4 @@
-// Find my mouse pointer: double-tap ctrl to draw ping rings around it
+// Find my mouse pointer: press the hotkey to draw ping rings around it
 // (green = 8.8.8.8 answered, red = failure)
 
 const pingResponses = {
@@ -8,9 +8,6 @@ const pingResponses = {
     receivedPacket: { green: 1 },
 }
 
-let firstDown = 0
-let secondDown = 0
-let ctrlWasDown = false
 let activePing = null // ping objects are weakly held; keep the running one alive
 
 function showMouseCircle() {
@@ -36,33 +33,32 @@ function showMouseCircle() {
     })
 }
 
-const tap = hs.eventtap.addWatcher([hs.eventtap.eventTypes.flagsChanged], (event) => {
-    if (!event.flags.includes("ctrl")) {
-        ctrlWasDown = false
-        return
-    }
-    if (ctrlWasDown) return
-    ctrlWasDown = true
-
-    const now = hs.timer.absoluteTime()
-    if (secondDown + 1e9 > now && !activePing) {
-        firstDown = secondDown = 0
-        showMouseCircle()
-    } else if (firstDown + 1e9 > now) {
-        secondDown = now
-    } else {
-        secondDown = 0
-        firstDown = now
-    }
-}, true)
+let hotkeys = []
 
 module.exports = {
+    // Actions for bindHotkeys(), e.g. hs.spoons.use("Mouse", { hotkeys: { show: [["cmd", "shift"], "m"] } })
+    bindings: {
+        show: { pressed: () => { if (!activePing) showMouseCircle() }, message: "Show mouse pointer" },
+    },
+    defaultHotkeys: {
+        show: [["ctrl", "alt", "cmd"], "m"],
+    },
+
+    bindHotkeys(mapping) {
+        hotkeys.forEach(h => h.destroy())
+        hotkeys = Object.entries(mapping).map(([action, [mods, key]]) => {
+            const b = this.bindings[action]
+            if (!b) throw new Error(`Mouse: unknown hotkey action '${action}'`)
+            return hs.hotkey.bind(mods, key, b.pressed, b.released, b.repeat)
+        }).filter(Boolean)
+        return this
+    },
     start() {
-        tap.start()
+        hotkeys.forEach(h => h.enable())
         return this
     },
     stop() {
-        tap.stop()
+        hotkeys.forEach(h => h.disable())
         return this
     },
 }

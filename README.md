@@ -25,7 +25,7 @@ and its default keys in `defaultHotkeys`. `start()` / `stop()` enable / disable 
 | ScreenManagement | `next` (`cah Up`), `previous` (`cah Down`): move window to another screen | |
 | TerminalSwitch | `toggle` (`⌥ Space`): terminal / previous app | `terminalApp` (bundle ID) |
 | Spotlight | `show` (`cah Space`): app / IntelliJ project launcher | |
-| Mouse | none; double-tap `ctrl` shows the mouse pointer (ping rings to 8.8.8.8) | |
+| Mouse | `show` (`ctrl-alt-cmd-M`): shows the mouse pointer (ping rings to 8.8.8.8) | |
 | TimeMachine | none; excludes caches and build folders from Time Machine on start | `rootDir`, `excludeDirs` |
 | Zoom | `meetings` (`cah Z`): join from Outlook, `share` (`⇧⌘ S`): start Zoom share | `meetings`, `microsoft` (see `init.js`) |
 | Calendar | `meetings` (`cah X`): join from macOS Calendar | `meetings` |

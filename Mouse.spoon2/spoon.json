@@ -2,5 +2,5 @@
     "name": "Mouse",
     "author": "Barry Lagerweij",
     "version": "1.0.0",
-    "description": "Find the mouse pointer: double-tap ctrl to draw ping rings around it."
+    "description": "Find the mouse pointer: press ctrl-alt-cmd-M to draw ping rings around it."
 }
