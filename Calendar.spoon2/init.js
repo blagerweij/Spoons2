@@ -1,6 +1,7 @@
 // Pick a Zoom/Teams meeting (default Ctrl-Alt-Cmd + X) from the macOS Calendar (hs.eventkit),
 // covering meetings in progress or starting within the next 15 minutes,
 // plus the fixed meetings in the `meetings` setting.
+// NOTE: requires hs.eventkit support !!!
 
 const cah = ["cmd", "alt", "ctrl"]
 const WINDOW_MS = 15 * 60 * 1000

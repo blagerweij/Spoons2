@@ -21,6 +21,7 @@
 // Note: requires an Azure-AD app registration with the redirect-uri above registered under
 // the "Mobile and desktop applications" platform (public client + PKCE, no client secret).
 // Login reuses the system browser's existing Microsoft session, so usually no prompt appears.
+// NOTE: once hs.eventkit support is available, this Spoon will be obsolete
 
 const cah = ["cmd", "alt", "ctrl"]
 const SCOPE = "offline_access https://graph.microsoft.com/Calendars.Read"
