@@ -1,6 +1,6 @@
 {
     "name": "Mouse",
     "author": "Barry Lagerweij",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Find the mouse pointer: press ctrl-alt-cmd-M to draw ping rings around it."
 }
