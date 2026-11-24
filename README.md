@@ -36,4 +36,4 @@ and its default keys in `defaultHotkeys`. `start()` / `stop()` enable / disable 
 | Slack | `switchChannel` (`cah K`) | |
 | Clipboard | `show` (`cah V`): pick one of the last 10 copies (text / image) and paste it | `maxItems`, `maxAgeHours`, `thumbnailSize`, `chooserWidth`, `placeholder`, `skipTypes`, `secretTypes`, `passwordManagerExtensions` |
 
-Presentify's drawing keys (`Esc`, `F` `L` `R` `O`, `1`-`6`) only exist while drawing and are fixed.
+Presentify's drawing keys (`Esc`, `F` `L` `R` `O`, `1`-`6`, `+` `-`) only exist while drawing and are fixed.

@@ -1,5 +1,6 @@
 // draw (default Ctrl + A): draw on screen with the left mouse button. Again or Escape stops (and clears).
-// While drawing: F = free draw, L = line, R = rectangle, O = ellipse, 1-6 = color.
+// While drawing: F = free draw, L = line, R = rectangle, O = ellipse, 1-6 = color, + / - = thickness.
+// A menu bar icon shows the tool and color; click it, or right-click anywhere, to change them.
 // A crosshair in the current color follows the mouse (macOS doesn't let us replace the cursor itself).
 // spotlight (default Ctrl + S): dims everything except a circle around the mouse. Again stops.
 // highlight (default Ctrl + L): draws a circle around the mouse. Again stops.
@@ -29,9 +30,12 @@ const PEN_SIZE = 32
 const types = hs.eventtap.eventTypes
 let tool = TOOLS.f
 let color = COLORS[0][1]
+let width = 4
 let canvases = [] // one per screen: { canvas, frame }
 let current = null // { canvas, frame, index, points } of the shape being drawn
 let pen = null // crosshair that follows the mouse while annotating
+let popup = null // hidden menu bar item that pops the same menu up at the mouse
+let menu = null // menu bar item showing the current tool and color while annotating
 
 let spotlights = [] // one per screen: { canvas, frame }
 let highlight = null // small canvas that follows the mouse
@@ -130,8 +134,71 @@ const mouseTap = hs.eventtap.addWatcher([types.mouseMoved, types.leftMouseDragge
     followMouse(event.location)
 }, true)
 
-const tap = hs.eventtap.addWatcher([types.leftMouseDown, types.leftMouseDragged, types.leftMouseUp], (event) => {
+// the current tool's shape, in the current color, as a menu bar icon
+const ICON_SIZE = 18
+const ICON_POINTS = [{ x: 2, y: 15 }, { x: 6, y: 6 }, { x: 10, y: 12 }, { x: 16, y: 3 }]
+function toolIcon() {
+    const c = hs.canvas.create({ x: 0, y: 0, w: ICON_SIZE, h: ICON_SIZE })
+        .appendElements([{ ...tool[1](ICON_POINTS), action: "stroke", strokeColor: color, strokeWidth: Math.min(width, 4) }])
+    const image = c.imageFromCanvas()
+    c.destroy()
+    return image
+}
+
+function refresh(label) {
+    pen.setElementAttribute(0, "strokeColor", { ...color, alpha: 0.9 })
+    menu.setIcon(toolIcon())
+    hs.ui.alert(label).show()
+}
+
+function setTool(t) {
+    tool = t
+    refresh(t[0])
+}
+
+function thicker(delta) {
+    width = Math.max(1, Math.min(24, width + delta))
+    refresh(`thickness ${width}`)
+}
+
+function setColor([name, c]) {
+    color = c
+    refresh(name)
+}
+
+// macOS gives no "menu closed" callback, so while the menu is open the tap passes every event through
+let menuOpen = false
+const menuItems = () => {
+    menuOpen = true
+    return menuEntries()
+}
+const menuEntries = () => [
+    ...Object.entries(TOOLS).map(([key, t]) => ({ title: `${t[0]} (${key.toUpperCase()})`, checked: t === tool, fn: () => setTool(t) })),
+    { title: "-" },
+    ...COLORS.map((entry, i) => ({ title: `${entry[0]} (${i + 1})`, checked: entry[1] === color, fn: () => setColor(entry) })),
+    { title: "-" },
+    { title: `Thicker (+), now ${width}`, fn: () => thicker(2) },
+    { title: "Thinner (-)", fn: () => thicker(-2) },
+]
+
+const tap = hs.eventtap.addWatcher([types.leftMouseDown, types.leftMouseDragged, types.leftMouseUp, types.rightMouseDown], (event) => {
     const p = event.location
+    // let clicks on the menu bar through, so our menu can be opened
+    const screen = canvasAt(canvases, p)
+    const menuBarHeight = hs.screen.primary().frame.y - hs.screen.primary().fullFrame.y
+    const inBar = screen && p.y - screen.frame.y < menuBarHeight
+    if (menuOpen) {
+        // clicking the menu bar again closes it; releasing anywhere below it chose an item or dismissed it
+        if ((event.type === types.leftMouseDown && inBar) || (event.type === types.leftMouseUp && !inBar)) menuOpen = false
+        return hs.eventtap.emit
+    }
+    if (inBar) return hs.eventtap.emit
+    if (event.type === types.rightMouseDown) {
+        // a hidden item pops its menu up at the mouse pointer; later, because the menu blocks while it is open
+        menuOpen = true
+        hs.timer.doAfter(0, () => popup && popup.popUpMenu(menuEntries()))
+        return hs.eventtap.consume
+    }
     // consumed drags never reach mouseTap
     if (event.type === types.leftMouseDragged) followMouse(p)
     if (event.type === types.leftMouseDown) {
@@ -145,7 +212,7 @@ const tap = hs.eventtap.addWatcher([types.leftMouseDown, types.leftMouseDragged,
         if (tool !== TOOLS.f) current.points.length = Math.min(current.points.length, 1)
         current.points.push({ x: p.x - current.frame.x, y: p.y - current.frame.y })
         const element = tool[1](current.points)
-        current.canvas.assignElement({ ...element, action: "stroke", strokeColor: { ...color, alpha: 0.9 }, strokeWidth: 4 }, current.index)
+        current.canvas.assignElement({ ...element, action: "stroke", strokeColor: { ...color, alpha: 0.9 }, strokeWidth: width }, current.index)
     } else {
         current = null
     }
@@ -161,6 +228,10 @@ function stopDrawing() {
     current = null
     pen.destroy()
     pen = null
+    menu.destroy()
+    popup.destroy()
+    menu = popup = null
+    menuOpen = false
     updateMouseTap()
 }
 
@@ -178,18 +249,18 @@ function startDrawing() {
         }])
     moveTo(pen, PEN_SIZE, hs.mouse.absolutePosition())
     pen.show()
+    menu = hs.menubar.create()
+    menu.setMenu(menuItems)
+    popup = hs.menubar.create(true)
+    menu.setIcon(toolIcon())
     // keys that only work while annotating
     modeKeys = [
         hs.hotkey.bind([], "escape", stopDrawing),
-        ...Object.entries(TOOLS).map(([key, t]) => hs.hotkey.bind([], key, () => {
-            tool = t
-            hs.ui.alert(t[0]).show()
-        })),
-        ...COLORS.map(([name, c], i) => hs.hotkey.bind([], `${i + 1}`, () => {
-            color = c
-            pen.setElementAttribute(0, "strokeColor", { ...color, alpha: 0.9 })
-            hs.ui.alert(name).show()
-        })),
+        ...Object.entries(TOOLS).map(([key, t]) => hs.hotkey.bind([], key, () => setTool(t))),
+        ...COLORS.map((entry, i) => hs.hotkey.bind([], `${i + 1}`, () => setColor(entry))),
+        // "+" is shift-"=" on most keyboards
+        ...[[[], "="], [["shift"], "="], [[], "pad+"]].map(([mods, key]) => hs.hotkey.bind(mods, key, () => thicker(2))),
+        ...["-", "pad-"].map((key) => hs.hotkey.bind([], key, () => thicker(-2))),
     ]
     tap.start()
     updateMouseTap()
