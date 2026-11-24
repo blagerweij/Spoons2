@@ -44,12 +44,10 @@ let modeKeys = [] // keys that only work while annotating
 
 // one click-through, full-screen canvas per screen
 function overlays(level) {
-    const primaryH = hs.screen.primary().fullFrame.h
     return hs.screen.all().map((screen) => {
         const f = screen.fullFrame
         const frame = { x: f.x, y: f.y, w: f.w, h: f.h }
-        // canvas windows use bottom-left origin
-        const canvas = hs.canvas.create({ x: f.x, y: primaryH - f.y - f.h, w: f.w, h: f.h })
+        const canvas = hs.canvas.create(frame)
             .ignoreMouseEvents(true)
             .levelValue(level)
             .behavior("canJoinAllSpaces")
@@ -94,8 +92,7 @@ function toggleSpotlight() {
 
 // center a small canvas on the mouse
 function moveTo(canvas, size, p) {
-    const primaryH = hs.screen.primary().fullFrame.h
-    canvas.setFrame({ x: p.x - size / 2, y: primaryH - p.y - size / 2 })
+    canvas.setFrame({ x: p.x - size / 2, y: p.y - size / 2 })
 }
 
 function toggleHighlight() {
