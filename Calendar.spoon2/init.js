@@ -53,13 +53,11 @@ function pickMeeting() {
     })
 }
 
-let hotkeys = []
-
 const spoon = module.exports = {
     // fixed meetings, e.g. { text: "My Meeting", id: "123456789", pwd: "secret" }
     meetings: [],
 
-    // Actions for bindHotkeys(), e.g. hs.spoons.use("Calendar", { hotkeys: { meetings: [["cmd", "alt"], "m"] } })
+    // Hotkey actions, bound by Hammerspoon, e.g. hs.spoons.use("Calendar", { hotkeys: { meetings: [["cmd", "alt"], "m"] } })
     bindings: {
         meetings: { pressed: pickMeeting, message: "Pick a Zoom/Teams meeting from the calendar" },
     },
@@ -67,21 +65,10 @@ const spoon = module.exports = {
         meetings: [cah, "x"],
     },
 
-    bindHotkeys(mapping) {
-        hotkeys.forEach(h => h.destroy())
-        hotkeys = Object.entries(mapping).map(([action, [mods, key]]) => {
-            const b = this.bindings[action]
-            if (!b) throw new Error(`Calendar: unknown hotkey action '${action}'`)
-            return hs.hotkey.bind(mods, key, b.pressed, b.released, b.repeat)
-        }).filter(Boolean)
-        return this
-    },
     start() {
-        hotkeys.forEach(h => h.enable())
         return this
     },
     stop() {
-        hotkeys.forEach(h => h.disable())
         chooser.hide()
         return this
     },

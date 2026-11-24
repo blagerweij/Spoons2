@@ -15,7 +15,7 @@ hs.spoons.use("WindowManagement", {
 ```
 
 Each Spoon lists its actions in `bindings` (`pressed`, optional `released` / `repeat`, and a `message` describing it)
-and its default keys in `defaultHotkeys`. `start()` / `stop()` enable / disable the hotkeys.
+and its default keys in `defaultHotkeys`.
 
 `cah` below is `ctrl⌥⌘`.
 
