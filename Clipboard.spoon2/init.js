@@ -94,8 +94,6 @@ chooser.onSelect = (item) => {
     hs.timer.doAfter(0.1, () => hs.eventtap.keyStroke(["cmd"], "v")) // let the previous app regain focus
 }
 
-let hotkeys = []
-
 function show() {
     chooser.placeholder = spoon.placeholder
     chooser.width = spoon.chooserWidth
@@ -118,7 +116,7 @@ const spoon = module.exports = {
         "nngceckbapebfimnlniiiahkandclblb", // Bitwarden
     ],
 
-    // Actions for bindHotkeys(), e.g. hs.spoons.use("Clipboard", { hotkeys: { show: [["cmd", "shift"], "v"] } })
+    // Hotkey actions, bound by Hammerspoon, e.g. hs.spoons.use("Clipboard", { hotkeys: { show: [["cmd", "shift"], "v"] } })
     bindings: {
         show: { pressed: show, message: "Show clipboard history" },
     },
@@ -126,24 +124,13 @@ const spoon = module.exports = {
         show: [["ctrl", "alt", "cmd"], "v"],
     },
 
-    bindHotkeys(mapping) {
-        hotkeys.forEach(h => h.destroy())
-        hotkeys = Object.entries(mapping).map(([action, [mods, key]]) => {
-            const b = this.bindings[action]
-            if (!b) throw new Error(`Clipboard: unknown hotkey action '${action}'`)
-            return hs.hotkey.bind(mods, key, b.pressed, b.released, b.repeat)
-        }).filter(Boolean)
-        return this
-    },
     start() {
         hs.pasteboard.off("change", record)
         hs.pasteboard.on("change", record)
-        hotkeys.forEach(h => h.enable())
         return this
     },
     stop() {
         hs.pasteboard.off("change", record)
-        hotkeys.forEach(h => h.disable())
         chooser.hide()
         return this
     },

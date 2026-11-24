@@ -41,7 +41,6 @@ let spotlights = [] // one per screen: { canvas, frame }
 let highlight = null // small canvas that follows the mouse
 
 let modeKeys = [] // keys that only work while annotating
-let hotkeys = []
 
 // one click-through, full-screen canvas per screen
 function overlays(level) {
@@ -267,7 +266,7 @@ function startDrawing() {
 }
 
 module.exports = {
-    // Actions for bindHotkeys(), e.g. hs.spoons.use("Presentify", { hotkeys: { draw: [["cmd", "shift"], "d"] } })
+    // Hotkey actions, bound by Hammerspoon, e.g. hs.spoons.use("Presentify", { hotkeys: { draw: [["cmd", "shift"], "d"] } })
     bindings: {
         draw: { pressed: () => (canvases.length ? stopDrawing() : startDrawing()), message: "Toggle drawing on screen" },
         spotlight: { pressed: toggleSpotlight, message: "Toggle spotlight around the mouse" },
@@ -279,24 +278,13 @@ module.exports = {
         highlight: [["ctrl"], "l"],
     },
 
-    bindHotkeys(mapping) {
-        hotkeys.forEach(h => h.destroy())
-        hotkeys = Object.entries(mapping).map(([action, [mods, key]]) => {
-            const b = this.bindings[action]
-            if (!b) throw new Error(`Presentify: unknown hotkey action '${action}'`)
-            return hs.hotkey.bind(mods, key, b.pressed, b.released, b.repeat)
-        }).filter(Boolean)
-        return this
-    },
     start() {
-        hotkeys.forEach(h => h.enable())
         return this
     },
     stop() {
         if (canvases.length) stopDrawing()
         if (spotlights.length) toggleSpotlight()
         if (highlight) toggleHighlight()
-        hotkeys.forEach(h => h.disable())
         return this
     },
 }

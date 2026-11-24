@@ -15,10 +15,8 @@ function switchChannel() {
     hs.application.launchOrFocus(slackBundleID)
 }
 
-let hotkeys = []
-
 module.exports = {
-    // Actions for bindHotkeys(), e.g. hs.spoons.use("Slack", { hotkeys: { switchChannel: [["cmd", "shift"], "k"] } })
+    // Hotkey actions, bound by Hammerspoon, e.g. hs.spoons.use("Slack", { hotkeys: { switchChannel: [["cmd", "shift"], "k"] } })
     bindings: {
         switchChannel: { pressed: switchChannel, message: "Switch to a Slack channel" },
     },
@@ -26,21 +24,10 @@ module.exports = {
         switchChannel: [cah, "k"],
     },
 
-    bindHotkeys(mapping) {
-        hotkeys.forEach(h => h.destroy())
-        hotkeys = Object.entries(mapping).map(([action, [mods, key]]) => {
-            const b = this.bindings[action]
-            if (!b) throw new Error(`Slack: unknown hotkey action '${action}'`)
-            return hs.hotkey.bind(mods, key, b.pressed, b.released, b.repeat)
-        }).filter(Boolean)
-        return this
-    },
     start() {
-        hotkeys.forEach(h => h.enable())
         return this
     },
     stop() {
-        hotkeys.forEach(h => h.disable())
         return this
     },
 }

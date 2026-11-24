@@ -32,10 +32,8 @@ function toggleMicMute() {
     broadcast(mute ? "📵 Muted" : "🎙 On air")
 }
 
-let hotkeys = []
-
 module.exports = {
-    // Actions for bindHotkeys(), e.g. hs.spoons.use("Mute", { hotkeys: { toggle: [["cmd", "shift"], "m"] } })
+    // Hotkey actions, bound by Hammerspoon, e.g. hs.spoons.use("Mute", { hotkeys: { toggle: [["cmd", "shift"], "m"] } })
     bindings: {
         toggle: { pressed: toggleMicMute, message: "Toggle microphone mute" },
         // a second key for the same action, e.g. a programmable mouse/keyboard button
@@ -46,21 +44,10 @@ module.exports = {
         toggleAlt: [[], "f20"],
     },
 
-    bindHotkeys(mapping) {
-        hotkeys.forEach(h => h.destroy())
-        hotkeys = Object.entries(mapping).map(([action, [mods, key]]) => {
-            const b = this.bindings[action]
-            if (!b) throw new Error(`Mute: unknown hotkey action '${action}'`)
-            return hs.hotkey.bind(mods, key, b.pressed, b.released, b.repeat)
-        }).filter(Boolean)
-        return this
-    },
     start() {
-        hotkeys.forEach(h => h.enable())
         return this
     },
     stop() {
-        hotkeys.forEach(h => h.disable())
         return this
     },
 }

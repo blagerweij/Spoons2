@@ -28,7 +28,6 @@ const SCOPE = "offline_access https://graph.microsoft.com/Calendars.Read"
 let settings = { accessTokenExpiration: 0 }
 let verifier = null
 let server = null
-let hotkeys = []
 
 const formencode = (form) =>
     Object.entries(form).map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join("&")
@@ -160,10 +159,10 @@ function showMeetings() {
 const spoon = module.exports = {
     // fixed meetings, e.g. { text: "My Meeting", id: "123456789", pwd: "secret" }
     meetings: [],
-    // Azure-AD app registration, see above; the Zoom hotkeys are disabled without it
+    // Azure-AD app registration, see above
     microsoft: null,
 
-    // Actions for bindHotkeys(), e.g. hs.spoons.use("Zoom", { hotkeys: { share: [["shift", "cmd"], "s"] } })
+    // Hotkey actions, bound by Hammerspoon, e.g. hs.spoons.use("Zoom", { hotkeys: { share: [["shift", "cmd"], "s"] } })
     bindings: {
         meetings: { pressed: showMeetings, message: "Pick a meeting from your Outlook agenda" },
         share: {
@@ -176,19 +175,8 @@ const spoon = module.exports = {
         share: [["shift", "cmd"], "s"],
     },
 
-    bindHotkeys(mapping) {
-        hotkeys.forEach(h => h.destroy())
-        hotkeys = Object.entries(mapping).map(([action, [mods, key]]) => {
-            const b = this.bindings[action]
-            if (!b) throw new Error(`Zoom: unknown hotkey action '${action}'`)
-            return hs.hotkey.bind(mods, key, b.pressed, b.released, b.repeat)
-        }).filter(Boolean)
-        return this
-    },
-
     start() {
         this.stop()
-        hotkeys.forEach(h => h.enable())
         if (!this.microsoft) {
             console.warn("Zoom: no `microsoft` setting, Outlook meetings disabled")
             return this
@@ -214,7 +202,6 @@ const spoon = module.exports = {
         return this
     },
     stop() {
-        hotkeys.forEach(h => h.disable())
         server?.stop()
         server?.destroy()
         server = null

@@ -58,10 +58,8 @@ chooseApplication.onSelect = (result) => {
     }
 }
 
-let hotkeys = []
-
 module.exports = {
-    // Actions for bindHotkeys(), e.g. hs.spoons.use("Spotlight", { hotkeys: { show: [["cmd"], "space"] } })
+    // Hotkey actions, bound by Hammerspoon, e.g. hs.spoons.use("Spotlight", { hotkeys: { show: [["cmd"], "space"] } })
     bindings: {
         show: { pressed: () => chooseApplication.show(), message: "Search apps and IntelliJ projects" },
     },
@@ -69,22 +67,11 @@ module.exports = {
         show: [cah, "space"],
     },
 
-    bindHotkeys(mapping) {
-        hotkeys.forEach(h => h.destroy())
-        hotkeys = Object.entries(mapping).map(([action, [mods, key]]) => {
-            const b = this.bindings[action]
-            if (!b) throw new Error(`Spotlight: unknown hotkey action '${action}'`)
-            return hs.hotkey.bind(mods, key, b.pressed, b.released, b.repeat)
-        }).filter(Boolean)
-        return this
-    },
     start() {
         chooseApplication.setChoices(initializeApplicationChoices())
-        hotkeys.forEach(h => h.enable())
         return this
     },
     stop() {
-        hotkeys.forEach(h => h.disable())
         chooseApplication.hide()
         return this
     },
