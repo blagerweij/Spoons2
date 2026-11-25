@@ -1,7 +1,8 @@
-// draw (default Ctrl + A): draw on screen with the left mouse button. Again or Escape stops (and clears).
+// draw (default Ctrl + A): annotate the screen. Hold Ctrl and use the left mouse button to draw; without Ctrl clicks go
+// to the apps below. Ctrl + Z undoes the last shape. Again or Escape stops (and clears).
 // While drawing: F = free draw, L = line, R = rectangle, O = ellipse, 1-6 = color, + / - = thickness.
 // A menu bar icon shows the tool and color; click it, or right-click anywhere, to change them.
-// A crosshair in the current color follows the mouse (macOS doesn't let us replace the cursor itself).
+// While Ctrl is held, a crosshair in the current color follows the mouse (macOS doesn't let us replace the cursor itself).
 // spotlight (default Ctrl + S): dims everything except a circle around the mouse. Again stops.
 // highlight (default Ctrl + L): draws a circle around the mouse. Again stops.
 
@@ -33,6 +34,7 @@ let color = COLORS[0][1]
 let width = 4
 let canvases = [] // one per screen: { canvas, frame }
 let current = null // { canvas, frame, index, points } of the shape being drawn
+let history = [] // finished shapes, for undo
 let pen = null // crosshair that follows the mouse while annotating
 let popup = null // hidden menu bar item that pops the same menu up at the mouse
 let menu = null // menu bar item showing the current tool and color while annotating
@@ -126,7 +128,13 @@ function updateMouseTap() {
     else mouseTap.stop()
 }
 
-const mouseTap = hs.eventtap.addWatcher([types.mouseMoved, types.leftMouseDragged], (event) => {
+const ctrl = (event) => event.flags.includes("ctrl")
+
+const mouseTap = hs.eventtap.addWatcher([types.mouseMoved, types.leftMouseDragged, types.flagsChanged], (event) => {
+    if (event.type === types.flagsChanged) {
+        if (pen) ctrl(event) ? pen.show() : pen.hide()
+        return
+    }
     followMouse(event.location)
 }, true)
 
@@ -189,6 +197,9 @@ const tap = hs.eventtap.addWatcher([types.leftMouseDown, types.leftMouseDragged,
         return hs.eventtap.emit
     }
     if (inBar) return hs.eventtap.emit
+    // only Ctrl + click starts drawing (or the menu); a drag that started drawing continues even if Ctrl is released
+    const continuing = event.type === types.leftMouseDragged || event.type === types.leftMouseUp
+    if (!(continuing ? current : ctrl(event))) return hs.eventtap.emit
     if (event.type === types.rightMouseDown) {
         // a hidden item pops its menu up at the mouse pointer; later, because the menu blocks while it is open
         menuOpen = true
@@ -210,10 +221,16 @@ const tap = hs.eventtap.addWatcher([types.leftMouseDown, types.leftMouseDragged,
         const element = tool[1](current.points)
         current.canvas.assignElement({ ...element, action: "stroke", strokeColor: { ...color, alpha: 0.9 }, strokeWidth: width }, current.index)
     } else {
+        if (current && current.points.length > 1) history.push(current)
         current = null
     }
     return hs.eventtap.consume
 }, false)
+
+function undo() {
+    const last = history.pop()
+    if (last) last.canvas.removeElement(last.index)
+}
 
 function stopDrawing() {
     tap.stop()
@@ -222,6 +239,7 @@ function stopDrawing() {
     canvases.forEach(({ canvas }) => canvas.destroy())
     canvases = []
     current = null
+    history = []
     pen.destroy()
     pen = null
     menu.destroy()
@@ -244,7 +262,7 @@ function startDrawing() {
             coordinates: [{ x: 0, y: m }, { x: PEN_SIZE, y: m }, { x: m, y: m }, { x: m, y: 0 }, { x: m, y: PEN_SIZE }],
         }])
     moveTo(pen, PEN_SIZE, hs.mouse.absolutePosition())
-    pen.show()
+    pen.show() // Ctrl is still down from the hotkey; the flagsChanged watcher hides it when Ctrl is released
     menu = hs.menubar.create()
     menu.setMenu(menuItems)
     popup = hs.menubar.create(true)
@@ -252,6 +270,7 @@ function startDrawing() {
     // keys that only work while annotating
     modeKeys = [
         hs.hotkey.bind([], "escape", stopDrawing),
+        hs.hotkey.bind(["ctrl"], "z", undo),
         ...Object.entries(TOOLS).map(([key, t]) => hs.hotkey.bind([], key, () => setTool(t))),
         ...COLORS.map((entry, i) => hs.hotkey.bind([], `${i + 1}`, () => setColor(entry))),
         // "+" is shift-"=" on most keyboards
