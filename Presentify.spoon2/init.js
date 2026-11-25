@@ -1,10 +1,12 @@
 // draw (default Ctrl + A): annotate the screen. Hold Ctrl and use the left mouse button to draw; without Ctrl clicks go
 // to the apps below. Ctrl + Z undoes the last shape. Again or Escape stops (and clears).
-// While drawing: F = free draw, L = line, R = rectangle, O = ellipse, 1-6 = color, + / - = thickness.
+// While drawing: + / - = thickness. With the setting `drawHotkeys: true`: Ctrl + F = free draw, L = line,
+// R = rectangle, O = ellipse, 1-6 = color (off by default: use the menu).
+// e.g. hs.spoons.use("Presentify", { config: { drawHotkeys: true }, hotkeys: "default", start: true })
 // A menu bar icon shows the tool and color; click it, or right-click anywhere, to change them.
 // While Ctrl is held, a crosshair in the current color follows the mouse (macOS doesn't let us replace the cursor itself).
 // spotlight (default Ctrl + S): dims everything except a circle around the mouse. Again stops.
-// highlight (default Ctrl + L): draws a circle around the mouse. Again stops.
+// highlight (default Ctrl + H): draws a circle around the mouse. Again stops.
 
 const COLORS = [
     ["red", { red: 1 }],
@@ -172,14 +174,15 @@ function setColor([name, c]) {
 
 // macOS gives no "menu closed" callback, so while the menu is open the tap passes every event through
 let menuOpen = false
+const hint = (key) => (presentify.drawHotkeys ? ` (Ctrl ${key})` : "")
 const menuItems = () => {
     menuOpen = true
     return menuEntries()
 }
 const menuEntries = () => [
-    ...Object.entries(TOOLS).map(([key, t]) => ({ title: `${t[0]} (${key.toUpperCase()})`, checked: t === tool, fn: () => setTool(t) })),
+    ...Object.entries(TOOLS).map(([key, t]) => ({ title: `${t[0]}${hint(key.toUpperCase())}`, checked: t === tool, fn: () => setTool(t) })),
     { title: "-" },
-    ...COLORS.map((entry, i) => ({ title: `${entry[0]} (${i + 1})`, checked: entry[1] === color, fn: () => setColor(entry) })),
+    ...COLORS.map((entry, i) => ({ title: `${entry[0]}${hint(i + 1)}`, checked: entry[1] === color, fn: () => setColor(entry) })),
     { title: "-" },
     { title: `Thicker (+), now ${width}`, fn: () => thicker(2) },
     { title: "Thinner (-)", fn: () => thicker(-2) },
@@ -271,8 +274,10 @@ function startDrawing() {
     modeKeys = [
         hs.hotkey.bind([], "escape", stopDrawing),
         hs.hotkey.bind(["ctrl"], "z", undo),
-        ...Object.entries(TOOLS).map(([key, t]) => hs.hotkey.bind([], key, () => setTool(t))),
-        ...COLORS.map((entry, i) => hs.hotkey.bind([], `${i + 1}`, () => setColor(entry))),
+        ...(presentify.drawHotkeys ? [
+            ...Object.entries(TOOLS).map(([key, t]) => hs.hotkey.bind(["ctrl"], key, () => setTool(t))),
+            ...COLORS.map((entry, i) => hs.hotkey.bind(["ctrl"], `${i + 1}`, () => setColor(entry))),
+        ] : []),
         // "+" is shift-"=" on most keyboards
         ...[[[], "="], [["shift"], "="], [[], "pad+"]].map(([mods, key]) => hs.hotkey.bind(mods, key, () => thicker(2))),
         ...["-", "pad-"].map((key) => hs.hotkey.bind([], key, () => thicker(-2))),
@@ -281,7 +286,9 @@ function startDrawing() {
     updateMouseTap()
 }
 
-module.exports = {
+const presentify = module.exports = {
+    drawHotkeys: false, // Ctrl + F / L / R / O and Ctrl + 1-6 while drawing
+
     // Hotkey actions, bound by Hammerspoon, e.g. hs.spoons.use("Presentify", { hotkeys: { draw: [["cmd", "shift"], "d"] } })
     bindings: {
         draw: { pressed: () => (canvases.length ? stopDrawing() : startDrawing()), message: "Toggle drawing on screen" },
@@ -291,7 +298,7 @@ module.exports = {
     defaultHotkeys: {
         draw: [["ctrl"], "a"],
         spotlight: [["ctrl"], "s"],
-        highlight: [["ctrl"], "l"],
+        highlight: [["ctrl"], "h"],
     },
 
     start() {
