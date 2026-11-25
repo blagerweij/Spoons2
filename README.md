@@ -32,8 +32,8 @@ and its default keys in `defaultHotkeys`.
 | Mute | `toggle` (`ctrl⌥ Space`), `toggleAlt` (`F20`): microphone mute (also Zoom / Teams) | |
 | Spotify | `playpause` (`cah P`) | |
 | Reminder | `add` (`cah R`): new reminder | |
-| Presentify | `draw` (`ctrl A`), `spotlight` (`ctrl S`), `highlight` (`ctrl L`) | |
+| Presentify | `draw` (`ctrl A`), `spotlight` (`ctrl S`), `highlight` (`ctrl H`) | `drawHotkeys` (default `false`) |
 | Slack | `switchChannel` (`cah K`) | |
 | Clipboard | `show` (`cah V`): pick one of the last 10 copies (text / image) and paste it | `maxItems`, `maxAgeHours`, `thumbnailSize`, `chooserWidth`, `placeholder`, `skipTypes`, `secretTypes`, `passwordManagerExtensions` |
 
-Presentify's drawing keys (`Esc`, `F` `L` `R` `O`, `1`-`6`, `+` `-`) only exist while drawing and are fixed.
+Presentify's drawing keys (`Esc`, `Ctrl Z`, `+` `-`) only exist while drawing and are fixed. With `drawHotkeys: true`, `Ctrl F` `L` `R` `O` (tool) and `Ctrl 1`-`6` (color) exist too.
