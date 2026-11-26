@@ -18,6 +18,7 @@ const RIPPLE = 150 // ripples fade out inside it
 const withAlpha = (c, alpha) => ({ red: 0, green: 0, blue: 0, ...c, alpha })
 
 function showMouseCircle() {
+    if (activePing) return // already running
     const p = hs.mouse.absolutePosition()
     const canvas = hs.canvas.create({ x: p.x - 200, y: p.y - 200, w: 400, h: 400 })
     canvas.ignoreMouseEvents(true)
@@ -64,14 +65,16 @@ function showMouseCircle() {
 }
 
 module.exports = {
+    // Callable from other scripts: hs.spoons.use("Mouse").showMouseCircle()
+    showMouseCircle,
+
     // Hotkey actions, bound by Hammerspoon, e.g. hs.spoons.use("Mouse", { hotkeys: { show: [["cmd", "shift"], "m"] } })
     bindings: {
-        show: { pressed: () => { if (!activePing) showMouseCircle() }, message: "Show mouse pointer" },
+        show: { pressed: showMouseCircle, message: "Show mouse pointer" },
     },
     defaultHotkeys: {
         show: [["ctrl", "alt", "cmd"], "m"],
     },
-
     start() {
         return this
     },
