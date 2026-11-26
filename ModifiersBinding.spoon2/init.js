@@ -42,7 +42,6 @@ const spoon = module.exports = {
         if (!MODIFIERS.includes(modifier)) throw new Error(`ModifiersBinding: unknown modifier "${spoon.modifier}"`)
         if (![2, 3].includes(spoon.presses)) throw new Error(`ModifiersBinding: presses must be 2 or 3, got ${spoon.presses}`)
         if (typeof spoon.action !== "function") throw new Error("ModifiersBinding: action must be a function")
-        spoon.stop()
         const types = hs.eventtap.eventTypes
         tap = hs.eventtap.addWatcher([types.flagsChanged, types.keyDown], (event) => {
             if (event.type === types.keyDown) count = 0 // modifier+key (e.g. ctrl+A) is a shortcut, not a tap
