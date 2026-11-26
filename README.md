@@ -35,5 +35,6 @@ and its default keys in `defaultHotkeys`.
 | Presentify | `draw` (`ctrl A`), `spotlight` (`ctrl S`), `highlight` (`ctrl H`) | `drawHotkeys` (default `false`) |
 | Slack | `switchChannel` (`cah K`) | |
 | Clipboard | `show` (`cah V`): pick one of the last 10 copies (text / image) and paste it | `maxItems`, `maxAgeHours`, `thumbnailSize`, `chooserWidth`, `placeholder`, `skipTypes`, `secretTypes`, `passwordManagerExtensions` |
+| ModifiersBinding | none; calls your `action` when a modifier is tapped 2x / 3x in a row | `modifier` (`ctrl`/`alt`/`cmd`/`shift`), `presses` (`2`/`3`), `interval` (seconds), `action` (function) |
 
 Presentify's drawing keys (`Esc`, `Ctrl Z`, `+` `-`) only exist while drawing and are fixed. With `drawHotkeys: true`, `Ctrl F` `L` `R` `O` (tool) and `Ctrl 1`-`6` (color) exist too.

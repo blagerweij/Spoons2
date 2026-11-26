@@ -1,0 +1,6 @@
+{
+    "name": "ModifiersBinding",
+    "author": "Barry Lagerweij",
+    "version": "1.0.0",
+    "description": "Run a function when a modifier key (ctrl, alt, cmd, shift) is pressed 2x or 3x in a row."
+}
